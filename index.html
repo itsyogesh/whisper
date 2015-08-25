@@ -15,6 +15,13 @@
 				float: left;
 				border: 1px #eee solid;
 			}
+			.error{
+				color: red;
+			}
+			.whisper{
+				color: gray;
+				font-style: italic;
+			}
 		</style>
 	</head>
 	<body>
@@ -76,13 +83,26 @@
 
 				$messageForm.submit(function(e){
 					e.preventDefault();
-					socket.emit('send message', $messageBox.val());
+					socket.emit('send message', $messageBox.val(), function(data){
+						$chat.append('<span class="error"><b>' +data + '</span><br/>');
+					});
+
 					$messageBox.val('');
 				});	
 
+				socket.on('load old messages', function(data){
+					data.forEach(function(msg){
+						$chat.append('<span class="msg"><b>' +msg.nick + ": </b>" + msg.msg + '</span><br/>');	
+					});
+				});
+
 				socket.on('new message', function(data){
 					console.log(data);
-					$chat.append('<b>' +data.name + ": </b>" + data.msg + '<br/>');
+					$chat.append('<span class="msg"><b>' +data.name + ": </b>" + data.msg + '</span><br/>');
+				});
+
+				socket.on('whisper', function(data){
+					$chat.append('<span class="whisper"><b>' +data.name + ": </b>" + data.msg + '</span><br/>');		
 				});
 			});
 		</script>
